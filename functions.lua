@@ -1,12 +1,15 @@
 warningx = -500
 warningTarget = 0
 doauradetection = false
+local lasttab = ""
+privateServerLink = ""
+webhookurl = ""
 local json = require("json")
 function loadSettings()
     if love.filesystem.getInfo("settings.json") then
         local contents = love.filesystem.read("settings.json")
-        local settings = json.decode(contents)
 
+        local settings = json.decode(contents)
         if settings then
             donormalbiomedetection = settings.donormalbiomedetection or false
 dowindybiomedetection = settings.dowindybiomedetection or false
@@ -25,11 +28,16 @@ doblazingsunbiomedetection = settings.doblazingsunbiomedetection or false
             censored = string.rep("*", #webhookurl)
             doauradetection = settings.doauradetection or false
         end
-    end
+    else
+    warningtext = "Settings file not found, loaded defaults."
+    warningTarget = 500
+    warningShowing = true
+    warningTimer = 3
+end
+
 end
 function love.keypressed(key)
 
-    -- WEBHOOK TAB
     if currentTab == "webhook" then
 
         if key == "v" and love.keyboard.isDown("lctrl") then
@@ -52,7 +60,7 @@ function love.keypressed(key)
             censored = webhookurl
         end
 
-    -- BIOME TAB
+
     elseif currentTab == "biome" then
 
         if key == "backspace" then
@@ -157,9 +165,11 @@ local settings = {
     warningShowing = true
     warningTimer = 3
 end
-function drawCheckbox(x, y, label, value)
+function drawCheckbox(x, y, label, value, color, textoffset)
     drawCornerBox(x, y, 40, 40)
-
+    if textoffset == nil then
+        textoffset = 0
+    end
     local hitbox = {
         x = x,
         y = y,
@@ -170,11 +180,15 @@ function drawCheckbox(x, y, label, value)
     love.graphics.setColor(1, 1, 1, 1)
 
     if value == true then
-        love.graphics.print("X", x + 12, y + 5)
+        love.graphics.print("X", x + 12 , y + 5)
     end
-
-    love.graphics.print(label, x - 25, y - 25)
-
+    if color == nil then
+    love.graphics.print(label, x - 25 + textoffset, y - 25)
+    else
+    love.graphics.setColor(color)
+    love.graphics.print(label, x - 25 + textoffset, y - 25)
+    love.graphics.setColor(1,1,1,1)
+    end
     return hitbox
 end
 function sendtestwebhook(embed, content)
@@ -272,14 +286,14 @@ function love.mousepressed(x, y, button)
         end
     end
     
-    -- Menu button
+
     if isOverMenu(x, y) then
         local playingsound = tabopenclose:clone()
         playingsound:play()
         menuopen = not menuopen
     end
     bgmnight:setLooping(true)
-    -- Song button
+
 local t = os.date("*t")
 local seconds = t.hour * 3600 + t.min * 60 + t.sec
     if pointInBox(x, y, songHitbox) then
@@ -302,34 +316,47 @@ local seconds = t.hour * 3600 + t.min * 60 + t.sec
         end
     end
 
-    -- Tabs
     if pointInBox(x, y, mainControlsHitbox) then
+        lasttab = currentTab
         currentTab = "maincontrols"
         rew:clone():play()
 
+
     elseif pointInBox(x, y, webhookHitbox) then
+        lasttab = currentTab
         currentTab = "webhook"
         rew:clone():play()
 
+
     elseif pointInBox(x, y, auraHitbox) then
+        lasttab = currentTab
         currentTab = "aura"
         rew:clone():play()
 
+
     elseif pointInBox(x, y, biomeHitbox) then
+        lasttab = currentTab
         currentTab = "biome"
         rew:clone():play()
 
+
     elseif pointInBox(x, y, fishingHitbox) then
+        lasttab = currentTab
         currentTab = "fishing"
         rew:clone():play()
 
+
     elseif pointInBox(x, y, creditsHitbox) then
+        lasttab = currentTab
         currentTab = "credits"
         rew:clone():play()
 
+
     elseif pointInBox(x, y, licensesHitbox) then
+        lasttab = currentTab
         currentTab = "licenses"
         rew:clone():play()
+
     end
     if pointInBox(x, y, normalBiomeHitbox) then
     donormalbiomedetection = not donormalbiomedetection
@@ -410,7 +437,7 @@ end
     }
 }, nil)
         macrostarted = true
-        checkBiome()
+     checkBiome()
         warningtext = "Macro started!"
 warningTarget = 500
 warningShowing = true
@@ -444,7 +471,7 @@ warningTimer = 3
     end
 end
 end
-    -- Test webhook
+
     if pointInBox(x, y, webhookButtonHitbox) then
         if currentTab ==  "webhook" then
         testWebhook()
@@ -480,7 +507,10 @@ function love.update(dt)
         print(string.format(
             "Lua heap: %.2f MB",
             collectgarbage("count") / 1024
+
         ))
+        collectgarbage("collect")
+        print("AFTER GC:", collectgarbage("count") / 1024, "MB")
     end
 
 if macrostarted == true then
@@ -488,9 +518,7 @@ if macrostarted == true then
 
     if biomeCheckTimer >= 1 then
         biomeCheckTimer = 0
-        print("using" .. robloxLogsPath .. "\\*.log")
-        print("[LuaSol] CHECKING LOG...")
-        checkBiome()
+  checkBiome()
     end
 else
     biomeCheckTimer = 0
@@ -533,14 +561,14 @@ function drawCornerBox(x, y, w, h)
     love.graphics.rectangle("line", x, y, w, h)
 
         love.graphics.setColor(0,0,0,0.5)
-    -- Main fill
+
     love.graphics.rectangle("fill", x + 2, y + 2, w - 4, h - 4)
 
-    -- Outline
+
 
     
 
-    -- Corner decorations
+
     love.graphics.setColor(1, 1, 1, 1)
     love.graphics.rectangle("fill", x + 2, y + 2, 10, 2)
     love.graphics.rectangle("fill", x + 2, y + 2, 2, 10)

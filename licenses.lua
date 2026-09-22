@@ -34,3 +34,6 @@ function love.wheelmoved(x, y)
         licenseScroll = 0
     end
 end
+function releaselicenses()
+    licenseText = ""
+end

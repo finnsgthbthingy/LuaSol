@@ -1,6 +1,5 @@
 
 
-
 local ffi = require("ffi")
 
 ffi.cdef[[
@@ -135,7 +134,7 @@ songHitbox = {
     h = 25
 }
 
-    -- corners
+
     love.graphics.rectangle("fill", 5, 5, 20, 2)
     love.graphics.rectangle("fill", 5, 5, 2, 20)
 
@@ -148,13 +147,13 @@ songHitbox = {
     love.graphics.rectangle("fill", width - 25, height - 7, 20, 2)
     love.graphics.rectangle("fill", width - 7, height - 25, 2, 20)
 
-    -- tabmenu
+
     love.graphics.line(tabmenuX, 10, tabmenuX + 15, 10)
     love.graphics.line(tabmenuX, 16, tabmenuX + 15, 16)
     love.graphics.line(tabmenuX, 22, tabmenuX + 15, 22)
     love.graphics.rectangle("line", tabmenuX - 5, 5, 25, 22)
 
-    -- Main controls box
+
     love.graphics.setColor(0.5, 0.5, 0.5, 0.5)
     drawCornerBox(
         800,
@@ -249,33 +248,41 @@ songHitbox = {
     )
     
     if currentTab == "maincontrols" then
+                require("maincontrols")
         drawMainControls()
 
+
     elseif currentTab == "webhook" then
+                require("webhook")
         drawWebhook()
 
     elseif currentTab == "aura" then
+                require("aura")
         drawAura()
 
     elseif currentTab == "biome" then
+
         drawBiome()
-
+        
     elseif currentTab == "fishing" then
+        require("fishing")
         drawFishing()
-
+        
     elseif currentTab == "credits" then
+        require("credits")
         drawCredits()
-
+        
     elseif currentTab == "licenses" then
+        require("licenses")
         drawLicenses()
+        
     end
 end
-
+        require("biome")
 require("functions")
-require("maincontrols")
-require("webhook")
-require("aura")
-require("biome")
-require("fishing")
-require("credits")
-require("licenses")
+
+
+
+
+
+

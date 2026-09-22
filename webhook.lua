@@ -5,7 +5,7 @@ local json = require("json")
     if doauradetection ~= nil then
         doauradetection = doauradetection
     end
-webhookurl = ""
+
 censored = ""
 censoredsave = ""
 loadSettings()
@@ -27,7 +27,7 @@ drawCornerBox(230, 50, 500, 40)
 
     love.graphics.setScissor(230, 50, 490, 50)
     love.graphics.print(censored, 230, 60)
-    love.graphics.setScissor() -- reset, or it clips everything drawn after this
+    love.graphics.setScissor() 
 
     love.graphics.setColor(0, 1, 0, 0.5)
     drawCornerBox(390, 95, 160, 30)

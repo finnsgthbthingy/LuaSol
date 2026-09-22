@@ -7,9 +7,9 @@ local prevState = "None"
 
 currentBiome = "None"
 currentEquipped = "None"
-
-function getLatestRobloxLog()
     local ffi = require("ffi")
+function getLatestRobloxLog()
+
 
     ffi.cdef[[
         typedef void* HANDLE;
@@ -111,7 +111,7 @@ function parseBloxstrapRPC(line)
     end
 
 
-    -- BIOME
+
 if biome and biome ~= "" and biome ~= prevBiome then
     currentBiome = biome
     prevBiome = biome
@@ -220,6 +220,15 @@ elseif biome == "SINGULARITY" then
 elseif biome == "BLAZING SUN" then
     shouldDetect = doblazingsunbiomedetection
 end
+local privateservermessage = ""
+if string.find(privateServerLink, "https://www.roblox.com/share?code=", 1, true)
+    or string.find(privateServerLink, "https://www.roblox.com/games/15532962292/", 1, true) then
+privateservermessage = "> ### Biome Started - " .. biome ..
+                          "\n> ### [Join Server](" .. privateServerLink .. ")"
+    else
+    privateservermessage = "> ### Biome Started - " .. biome ..
+                          "\n> ### No private server link provided :("
+    end
 
 if shouldDetect and biomedata then
     local everyoneping = ""
@@ -229,12 +238,10 @@ if shouldDetect and biomedata then
     or biome == "CYBERSPACE" then
         everyoneping = "@everyone"
     end
-end
+
     sendWebhookMessage({
         title = os.date("%d.%m.%Y %H:%M:%S"),
-
-        description = "> ### Biome Started - " .. biome ..
-                      "\n> ### [Join Server](" .. privateServerLink .. ")",
+        description = privateservermessage,
 
         color = biomedata.color,
 
@@ -247,7 +254,7 @@ end
         }
     }, everyoneping)
 end
-    -- AURA
+end
     if state
     and state ~= ""
     and state ~= "In Main Menu"
@@ -256,7 +263,7 @@ end
 
         local auraName = state
 
-        -- JSON has already been decoded, so NO backslashes here
+
         local extracted = state:match('Equipped "(.-)"')
 
         if extracted then
