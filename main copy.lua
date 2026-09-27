@@ -1,5 +1,5 @@
 
-local discordimage = love.graphics.newImage("assets/images/discord.png")
+
 local ffi = require("ffi")
 
 ffi.cdef[[
@@ -100,21 +100,18 @@ menuHitbox = {
 
 local fonts = {}
 
-
-
-local width = 1000
-local height = 600
-require("functions")
-if love.filesystem.getInfo("settings.json") then
-    function love.load()
+function love.load()
     loadSettings()
-    
     fonts.bold20 = love.graphics.newFont(fontPaths.bold, 20)
 end
 
 function fontconfig()
     love.graphics.setFont(fonts.bold20)
 end
+
+local width = 1000
+local height = 600
+
 function love.draw()
 
     love.graphics.clear(0.2,0.2,0.2,0.5)
@@ -201,13 +198,8 @@ songHitbox = {
         40
     )
     drawCornerBox (warningx - 500, 560, 500, 40)
-    drawCornerBox(740,550,250,30)
-    
-    love.graphics.setColor(0.447, 0.537, 0.855)
-        love.graphics.print("join the discord!",750,550)
-    love.graphics.setColor(1, 1, 1, 1)
-    love.graphics.draw(discordimage,925,547,0,0.070,0.070 )
 
+    love.graphics.setColor(1, 1, 1, 1)
 
     love.graphics.print(
         "Main controls",
@@ -287,10 +279,8 @@ songHitbox = {
     end
 end
         require("biome")
+require("functions")
 
-else
-    require("room_dogcheck")
-end
 
 
 

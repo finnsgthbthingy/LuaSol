@@ -22,7 +22,7 @@ doheavenbiomedetection = settings.doheavenbiomedetection or false
 docorruptionbiomedetection = settings.docorruptionbiomedetection or false
 donullbiomedetection = settings.donullbiomedetection or false
 dosingularitybiomedetection = settings.dosingularitybiomedetection or false
-doblazingsunbiomedetection = settings.doblazingsunbiomedetection or false
+-- doblazingsunbiomedetection = settings.doblazingsunbiomedetection or false
             webhookurl = settings.webhookurl or ""
             privateServerLink = settings.privateServerLink or ""
             censored = string.rep("*", #webhookurl)
@@ -118,6 +118,8 @@ local tabopenclose  = love.audio.newSource("assets/sounds/coolsound.mp3", "stati
 local bgm = love.audio.newSource("assets/sounds/bgm.mp3", "stream")
 local bgmnight = love.audio.newSource("assets/sounds/bgmnight.mp3", "stream")
 local rew = love.audio.newSource("assets/sounds/rew.mp3", "static")
+local save = love.audio.newSource("assets/sounds/undertale-save.mp3", "static")
+save:setVolume(0.5)
 love.filesystem.setRequirePath(love.filesystem.getRequirePath() .. ";?.lua;?/init.lua")
 love.filesystem.setCRequirePath(love.filesystem.getCRequirePath() .. ";?.dll")
 local webhookThread = love.thread.newThread("webhookthread.lua")
@@ -154,12 +156,12 @@ local settings = {
     docorruptionbiomedetection = docorruptionbiomedetection,
     donullbiomedetection = donullbiomedetection,
     dosingularitybiomedetection = dosingularitybiomedetection,
-    doblazingsunbiomedetection = doblazingsunbiomedetection
+  --  doblazingsunbiomedetection = doblazingsunbiomedetection
 }
 
     local contents = json.encode(settings)
     love.filesystem.write("settings.json", contents)
-
+    save:clone():play()
     warningtext = "Settings saved!"
     warningTarget = 500
     warningShowing = true
@@ -270,10 +272,18 @@ local function isOverMenu(mx, my)
 end
 
 function love.mousepressed(x, y, button)
-    
+    if button == 1 then
+
+        local bx, by, bw, bh = 740, 550, 250, 30
+        
+
+        if x >= bx and x <= bx + bw and y >= by and y <= by + bh then
+            love.system.openURL("https://discord.gg/BvMqebGsjk")
+        end
+    end
+
     if button ~= 1 then return end
         if pointInBox(x, y, savesettingshitbox) then
-        rew:clone():play()
         saveSettings()
     end
     if pointInBox(x, y, doauradetectionbuttonhitbox) and currentTab == "aura" then
@@ -413,10 +423,10 @@ if pointInBox(x, y, singularityBiomeHitbox) then
     rew:clone():play()
 end
 
-if pointInBox(x, y, blazingSunBiomeHitbox) then
-    doblazingsunbiomedetection = not doblazingsunbiomedetection
-    rew:clone():play()
-end
+-- if pointInBox(x, y, blazingSunBiomeHitbox) then
+ --   doblazingsunbiomedetection = not doblazingsunbiomedetection
+--    rew:clone():play()
+--end
 
     if currentTab == "maincontrols" then
     if pointInBox(x, y, startButtonHitbox) then

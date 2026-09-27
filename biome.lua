@@ -119,13 +119,13 @@ singularityBiomeHitbox = drawCheckbox(
     -5
 )
 
-blazingSunBiomeHitbox = drawCheckbox(
-    760,
-    presetpos + spacing * 2,
-    "Blazing Sun",
-    doblazingsunbiomedetection,
-    {1, 0.906, 0, 1},
-    -10
-)
+--blazingSunBiomeHitbox = drawCheckbox(
+--    760,
+--    presetpos + spacing * 2,
+--    "Blazing Sun",
+--    doblazingsunbiomedetection,
+--    {1, 0.906, 0, 1},
+--    -10
+--)
 end
 
