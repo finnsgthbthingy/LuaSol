@@ -5,37 +5,50 @@ local lasttab = ""
 privateServerLink = ""
 webhookurl = ""
 local json = require("json")
+local alreadyshownfailure = false
 function loadSettings()
-    if love.filesystem.getInfo("settings.json") then
-        local contents = love.filesystem.read("settings.json")
+    if not love.filesystem.getInfo("settings.json") then
+        return false
+    end
 
-        local settings = json.decode(contents)
-        if settings then
-            donormalbiomedetection = settings.donormalbiomedetection or false
-dowindybiomedetection = settings.dowindybiomedetection or false
-dosnowybiomedetection = settings.dosnowybiomedetection or false
-dorainybiomedetection = settings.dorainybiomedetection or false
-dosandstormbiomedetection = settings.dosandstormbiomedetection or false
-dohellbiomedetection = settings.dohellbiomedetection or false
-dostarfallbiomedetection = settings.dostarfallbiomedetection or false
-doheavenbiomedetection = settings.doheavenbiomedetection or false
-docorruptionbiomedetection = settings.docorruptionbiomedetection or false
-donullbiomedetection = settings.donullbiomedetection or false
-dosingularitybiomedetection = settings.dosingularitybiomedetection or false
--- doblazingsunbiomedetection = settings.doblazingsunbiomedetection or false
-            webhookurl = settings.webhookurl or ""
-            privateServerLink = settings.privateServerLink or ""
-            censored = string.rep("*", #webhookurl)
-            doauradetection = settings.doauradetection or false
+    local contents = love.filesystem.read("settings.json")
+
+    local success, settings = pcall(json.decode, contents)
+
+    if not success or not settings then
+        print("Failed to decode settings.json: " .. tostring(settings))
+        if alreadyshownfailure then
+        else
+        alreadyshownfailure = true
+        warningtext = "Settings file is invalid, loaded defaults." warningTarget = 500 warningShowing = true warningTimer = 3
+        return false
         end
-    else
-    warningtext = "Settings file not found, loaded defaults."
-    warningTarget = 500
-    warningShowing = true
-    warningTimer = 3
+    end
+
+
+    donormalbiomedetection = settings.donormalbiomedetection or false
+    dowindybiomedetection = settings.dowindybiomedetection or false
+    dosnowybiomedetection = settings.dosnowybiomedetection or false
+    dorainybiomedetection = settings.dorainybiomedetection or false
+    dosandstormbiomedetection = settings.dosandstormbiomedetection or false
+    dohellbiomedetection = settings.dohellbiomedetection or false
+    dostarfallbiomedetection = settings.dostarfallbiomedetection or false
+    doheavenbiomedetection = settings.doheavenbiomedetection or false
+    docorruptionbiomedetection = settings.docorruptionbiomedetection or false
+    donullbiomedetection = settings.donullbiomedetection or false
+    dosingularitybiomedetection = settings.dosingularitybiomedetection or false
+
+    webhookurl = settings.webhookurl or ""
+    privateServerLink = settings.privateServerLink or ""
+    censored = string.rep("*", #webhookurl)
+    doauradetection = settings.doauradetection or false
+
+    return true
 end
 
-end
+
+
+
 function love.keypressed(key)
 
     if currentTab == "webhook" then
@@ -491,8 +504,6 @@ end
 end
     local memTimer = 0
 function love.update(dt)
-
-
   local speed = 2.5
 
     if warningTarget == -500 then
