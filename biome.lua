@@ -118,14 +118,38 @@ singularityBiomeHitbox = drawCheckbox(
     {1, 0.714, 0, 1},
     -5
 )
-
---blazingSunBiomeHitbox = drawCheckbox(
---    760,
---    presetpos + spacing * 2,
---    "Blazing Sun",
---    doblazingsunbiomedetection,
---    {1, 0.906, 0, 1},
---    -10
---)
+LostForestBiomeHitbox = drawCheckbox(
+    760,
+    presetpos + spacing * 2,
+    "Lost Forest",
+    doLostForestBiomeDetection,
+    {0.06, 0.5, 0, 1},
+    -5,
+    false
+)
+TheRadiantForestBiomeHitbox = drawCheckbox(
+    250,
+    presetpos + spacing * 3,
+    "The Radiant Forest",
+    doTheRadiantForestdetection,
+    {1, 0.906, 0, 1},
+    -40,
+    true
+)
+PumpkinMoonBiomeHitbox = drawCheckbox(
+    250,
+    presetpos + spacing * 4,
+    "Pumpkin Moon",
+    doPumpkinMoonBiomeDetection,
+    {1.0, 0.647, 0.0, 1},
+    -30
+)
+GraveyardBiomeHitbox = drawCheckbox(
+    420,
+    presetpos + spacing * 4,
+    "Graveyard",
+    doGraveyardBiomeDetection,
+    {0.612, 0.5, 0.4, 1},
+    -30
+)
 end
-

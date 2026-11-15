@@ -1,3 +1,5 @@
+local ffi = require("ffi")
+
 
 local discordimage = love.graphics.newImage("assets/images/discord.png")
 local ffi = require("ffi")
@@ -191,12 +193,17 @@ songHitbox = {
         40
     )
                     drawCornerBox(
-        tabmenuX - 195, 230,
+        tabmenuX - 195, 275,
         185,
         40
     )
                         drawCornerBox(
-        tabmenuX - 195, 275,
+        tabmenuX - 195, 320,
+        185,
+        40
+    )
+                            drawCornerBox(
+        tabmenuX - 195, 230,
         185,
         40
     )
@@ -240,14 +247,19 @@ songHitbox = {
         190
     )
                         love.graphics.print(
-        "Credits",
+        "Auto item usage",
         tabmenuX - 185,
         235
+    )
+                        love.graphics.print(
+        "Credits",
+        tabmenuX - 185,
+        280
     )
                             love.graphics.print(
         "Licenses",
         tabmenuX - 185,
-        280
+        325
     )
                                 love.graphics.print(
         warningtext,
@@ -283,7 +295,9 @@ songHitbox = {
     elseif currentTab == "licenses" then
         require("licenses")
         drawLicenses()
-        
+    elseif currentTab == "autobrscuse" then
+        require("autobrscuse")
+        drawAutoitemusage()
     end
 end
         require("biome")

@@ -1,3 +1,4 @@
+busyusingstuff = false
 warningx = -500
 warningTarget = 0
 doauradetection = false
@@ -6,6 +7,270 @@ privateServerLink = ""
 webhookurl = ""
 local json = require("json")
 local alreadyshownfailure = false
+local waitingTasks = {}
+
+function wait(seconds, callback)
+    table.insert(waitingTasks, {
+        time = love.timer.getTime() + seconds,
+        callback = callback
+    })
+end
+local ffi = require("ffi")
+ffi.cdef[[
+typedef struct {
+    long dx; long dy;
+    unsigned long mouseData;
+    unsigned long dwFlags;
+    unsigned long time;
+    uintptr_t dwExtraInfo;
+} MOUSEINPUT;
+
+typedef struct {
+    unsigned short wVk;
+    unsigned short wScan;
+    unsigned long dwFlags;
+    unsigned long time;
+    uintptr_t dwExtraInfo;
+} KEYBDINPUT;
+
+typedef struct {
+    unsigned long type;
+    union { MOUSEINPUT mi; KEYBDINPUT ki; };
+} INPUT;
+
+typedef void* HWND;
+HWND FindWindowA(const char* lpClassName, const char* lpWindowName);
+int SetForegroundWindow(HWND hWnd);
+int ShowWindow(HWND hWnd, int nCmdShow);
+unsigned int SendInput(unsigned int cInputs, INPUT* pInputs, int cbSize);
+unsigned int MapVirtualKeyA(unsigned int uCode, unsigned int uMapType);
+int SetProcessDPIAware(void);
+]]
+
+local user32 = ffi.load("user32")
+user32.SetProcessDPIAware()
+
+local MOVE, ABSOLUTE, LEFTDOWN, LEFTUP = 0x0001, 0x8000, 0x0002, 0x0004
+local KEYUP, SCANCODE = 0x0002, 0x0008
+
+-- mouse
+local function send(flags, dx, dy)
+    local inp = ffi.new("INPUT")
+    inp.type = 0
+    inp.mi.dx, inp.mi.dy = dx or 0, dy or 0
+    inp.mi.dwFlags = flags
+    user32.SendInput(1, inp, ffi.sizeof("INPUT"))
+end
+
+local function moveRel(dx, dy) send(MOVE, dx, dy) end
+
+local function moveAbs(x, y, screenW, screenH)
+    send(bit.bor(MOVE, ABSOLUTE),
+         math.floor(x * 65535 / (screenW - 1)),
+         math.floor(y * 65535 / (screenH - 1)))
+end
+
+local function leftClick()
+    local inputs = ffi.new("INPUT[2]")
+    inputs[0].type = 0
+    inputs[0].mi.dwFlags = LEFTDOWN
+    inputs[1].type = 0
+    inputs[1].mi.dwFlags = LEFTUP
+    user32.SendInput(2, inputs, ffi.sizeof("INPUT"))
+end
+
+function focusWindow(title)
+    local hwnd = user32.FindWindowA(nil, title)
+    if hwnd == nil then return false end
+    user32.ShowWindow(hwnd, 9)
+    return user32.SetForegroundWindow(hwnd) ~= 0
+end
+
+-- keyboard
+local special = {
+    enter = 0x0D, esc = 0x1B, escape = 0x1B, space = 0x20,
+    tab = 0x09, backspace = 0x08, shift = 0x10, ctrl = 0x11,
+}
+
+local function vkOf(key)
+    local k = key:lower()
+    if special[k] then return special[k] end
+    return key:upper():byte()
+end
+
+local function keyEvent(vk, up)
+    local inp = ffi.new("INPUT")
+    inp.type = 1
+    inp.ki.wVk = 0
+    inp.ki.wScan = user32.MapVirtualKeyA(vk, 0)
+    inp.ki.dwFlags = bit.bor(SCANCODE, up and KEYUP or 0)
+    user32.SendInput(1, inp, ffi.sizeof("INPUT"))
+end
+
+local function tapKey(key, cb)
+    local vk = vkOf(key)
+    keyEvent(vk, false)
+    wait(0.05, function()
+        keyEvent(vk, true)
+        if cb then cb() end
+    end)
+end
+
+local function typeKeys(...)
+    local keys = {}
+    for _, k in ipairs({...}) do
+        if special[k:lower()] or #k == 1 then
+            keys[#keys + 1] = k
+        else
+            for ch in k:gmatch(".") do keys[#keys + 1] = ch end
+        end
+    end
+
+    local i = 1
+    local function nextKey()
+        local key = keys[i]
+        if not key then return end
+        i = i + 1
+        tapKey(key, function() wait(0.05, nextKey) end)
+    end
+    nextKey()
+end
+
+-- screen size
+local w, h = love.window.getDesktopDimensions()
+local scale = love.window.getDPIScale()
+local screenW, screenH = w * scale, h * scale
+
+function usebr()
+    busyusingstuff = true
+
+    wait(0.15, function()
+        moveAbs(31, 513, screenW, screenH)
+        wait(1, function()
+            moveRel(-1, 0)
+            leftClick()
+            moveAbs(1222, 335, screenW, screenH)
+            wait(1, function()
+                moveRel(-1, 0)
+                leftClick()
+                moveAbs(1088, 369, screenW, screenH)
+                wait(1, function()
+                    moveRel(-1, 0)
+                    leftClick()
+                    wait(1, function()
+                        typeKeys("Biome Randomizer")
+                        moveAbs(832, 473, screenW, screenH)
+                        wait(2, function()
+                            moveRel(-1, 0)
+                            leftClick()
+                            moveAbs(569, 581, screenW, screenH)
+                            wait(1,function()
+                            moveRel(-1, 0)
+                            leftClick()
+                            wait(0.1,function()
+                                
+
+                            leftClick()
+                            wait(0.3,function ()
+                                tapKey("backspace")
+                                typeKeys("1")
+                                moveAbs(691, 574, screenW, screenH)
+                                wait(0.1,function()
+                                    moveRel(-1, 0)
+                                    leftClick()
+                                    sendWebhookMessage({
+                                        title = "Auto BR and SC usage:joystick:",
+                                        description = "Used biome randomizer."
+                                    })
+                                    moveAbs(1413, 304,screenW,screenH)
+                                    wait(0.1,function()
+                                        moveRel(-1,0)
+                                        leftClick()
+                                        busyusingstuff = false
+                                    end)
+                                end)
+                             end)
+                            end)
+                            end)
+                        end)
+                    end)
+                end)
+            end)
+        end)
+    end)
+    
+end
+function usesc()
+    busyusingstuff = true
+
+    wait(0.15, function()
+        moveAbs(31, 513, screenW, screenH)
+        wait(1, function()
+            moveRel(-1, 0)
+            leftClick()
+            moveAbs(1222, 335, screenW, screenH)
+            wait(1, function()
+                moveRel(-1, 0)
+                leftClick()
+                moveAbs(1088, 369, screenW, screenH)
+                wait(1, function()
+                    moveRel(-1, 0)
+                    leftClick()
+                    wait(1, function()
+                        typeKeys("Strange Controller")
+                        moveAbs(832, 473, screenW, screenH)
+                        wait(2, function()
+                            moveRel(-1, 0)
+                            leftClick()
+                            moveAbs(569, 581, screenW, screenH)
+                            wait(1,function()
+                            moveRel(-1, 0)
+                            leftClick()
+                            wait(0.1,function()
+                                
+
+                            leftClick()
+                            wait(0.3,function ()
+                                tapKey("backspace")
+                                typeKeys("1")
+                                moveAbs(691, 574, screenW, screenH)
+                                wait(0.1,function()
+                                    moveRel(-1, 0)
+                                    leftClick()
+                                    sendWebhookMessage({
+                                        title = "Auto BR and SC usage:joystick:",
+                                        description = "Used strange controller."
+                                    })
+                                    moveAbs(1413, 304,screenW,screenH)
+                                    wait(0.1,function()
+                                        moveRel(-1,0)
+                                        leftClick()
+                                        busyusingstuff = false
+                                    end)
+                                end)
+                             end)
+                            end)
+                            end)
+                        end)
+                    end)
+                end)
+            end)
+        end)
+    end)
+
+end
+function updateWaits()
+    local now = love.timer.getTime()
+
+    for i = #waitingTasks, 1, -1 do
+        local task = waitingTasks[i]
+
+        if now >= task.time then
+            table.remove(waitingTasks, i)
+            task.callback()
+        end
+    end
+end
 function loadSettings()
     if not love.filesystem.getInfo("settings.json") then
         return false
@@ -37,6 +302,12 @@ function loadSettings()
     docorruptionbiomedetection = settings.docorruptionbiomedetection or false
     donullbiomedetection = settings.donullbiomedetection or false
     dosingularitybiomedetection = settings.dosingularitybiomedetection or false
+    doLostForestBiomeDetection = settings.doLostForestBiomeDetection or false
+    doTheRadiantForestdetection = settings.doTheRadiantForestdetection or false
+    doGraveyardBiomeDetection = settings.doGraveyardBiomeDetection or false
+    doPumpkinMoonBiomeDetection = settings.doPumpkinMoonBiomeDetection or false
+    shouldusebr = settings.shouldusebr or false
+    shouldusesc = settings.shouldusesc or false
 
     webhookurl = settings.webhookurl or ""
     privateServerLink = settings.privateServerLink or ""
@@ -95,7 +366,6 @@ end
 
 
 function love.keyreleased(key)
-
     if key == "l" then
         censored = string.rep("*", #webhookurl)
     end
@@ -122,7 +392,8 @@ function love.textinput(t)
     end
 
 end
- 
+ local brsincelastused = 0
+ local scsincelastused = 0
 
 require("logmonitor")
 local handCursor   = love.mouse.getSystemCursor("hand")
@@ -169,7 +440,12 @@ local settings = {
     docorruptionbiomedetection = docorruptionbiomedetection,
     donullbiomedetection = donullbiomedetection,
     dosingularitybiomedetection = dosingularitybiomedetection,
-  --  doblazingsunbiomedetection = doblazingsunbiomedetection
+    doTheRadiantForestdetection = doTheRadiantForestdetection,
+    doLostForestBiomeDetection = doLostForestBiomeDetection,
+    doGraveyardBiomeDetection = doGraveyardBiomeDetection,
+    doPumpkinMoonBiomeDetection = doPumpkinMoonBiomeDetection,
+    shouldusebr = shouldusebr,
+    shouldusesc = shouldusesc
 }
 
     local contents = json.encode(settings)
@@ -180,11 +456,30 @@ local settings = {
     warningShowing = true
     warningTimer = 3
 end
-function drawCheckbox(x, y, label, value, color, textoffset)
+local gradient = love.graphics.newShader([[
+    vec4 effect(vec4 color, Image tex, vec2 uv, vec2 screen_coords)
+    {
+        vec4 pixel = Texel(tex, uv) * color;
+
+        vec3 left   = vec3(0.722, 0.898, 1.000); // #B8E5FF
+        vec3 middle = vec3(0.788, 0.773, 1.000); // #C9C5FF
+        vec3 right  = vec3(1.000, 0.788, 0.941); // #FFC9F0
+
+        vec3 grad;
+        float x = uv.x * 4;
+        if (uv.x < 0.5)
+            grad = mix(left, middle, uv.x * 2.0);
+        else
+            grad = mix(middle, right, (uv.x - 0.5) * 2.0);
+
+        return vec4(grad, pixel.a);
+    }
+]])
+function drawCheckbox(x, y, label, value, color, textoffset, gradientt)
     drawCornerBox(x, y, 40, 40)
-    if textoffset == nil then
-        textoffset = 0
-    end
+
+    textoffset = textoffset or 0
+
     local hitbox = {
         x = x,
         y = y,
@@ -194,16 +489,26 @@ function drawCheckbox(x, y, label, value, color, textoffset)
 
     love.graphics.setColor(1, 1, 1, 1)
 
-    if value == true then
-        love.graphics.print("X", x + 12 , y + 5)
+    if value then
+        love.graphics.print("X", x + 12, y + 5)
     end
-    if color == nil then
-    love.graphics.print(label, x - 25 + textoffset, y - 25)
+
+    if color then
+        love.graphics.setColor(color)
     else
-    love.graphics.setColor(color)
-    love.graphics.print(label, x - 25 + textoffset, y - 25)
-    love.graphics.setColor(1,1,1,1)
+        love.graphics.setColor(1, 1, 1, 1)
     end
+
+    if gradientt then
+        love.graphics.setShader(gradient)
+    end
+
+    love.graphics.print(label, x - 25 + textoffset, y - 25)
+
+    
+    love.graphics.setShader()
+    love.graphics.setColor(1, 1, 1, 1)
+
     return hitbox
 end
 function sendtestwebhook(embed, content)
@@ -379,7 +684,9 @@ local seconds = t.hour * 3600 + t.min * 60 + t.sec
         lasttab = currentTab
         currentTab = "licenses"
         rew:clone():play()
-
+    elseif pointInBox(x, y, AutoUsageHitbox) then
+        lasttab = currentTab
+        currentTab = "autobrscuse"
     end
     if pointInBox(x, y, normalBiomeHitbox) then
     donormalbiomedetection = not donormalbiomedetection
@@ -436,10 +743,30 @@ if pointInBox(x, y, singularityBiomeHitbox) then
     rew:clone():play()
 end
 
--- if pointInBox(x, y, blazingSunBiomeHitbox) then
- --   doblazingsunbiomedetection = not doblazingsunbiomedetection
---    rew:clone():play()
---end
+ if pointInBox(x, y, TheRadiantForestBiomeHitbox) then
+   doTheRadiantForestdetection = not doTheRadiantForestdetection
+   rew:clone():play()
+end
+ if pointInBox(x, y, LostForestBiomeHitbox) then
+    doLostForestBiomeDetection = not doLostForestBiomeDetection
+    rew:clone():play()
+ end
+ if pointInBox(x,y, PumpkinMoonBiomeHitbox) then
+    doPumpkinMoonBiomeDetection = not doPumpkinMoonBiomeDetection   
+    rew:clone():play()
+ end
+ if pointInBox(x,y, GraveyardBiomeHitbox) then
+    doGraveyardBiomeDetection = not doGraveyardBiomeDetection   
+    rew:clone():play()
+ end
+ if pointInBox(x,y, autobrusehitbox) then
+    shouldusebr = not shouldusebr
+    rew:clone():play()
+ end
+    if pointInBox(x,y, autoscusehitbox) then
+    shouldusesc = not shouldusesc
+    rew:clone():play()
+    end
 
     if currentTab == "maincontrols" then
     if pointInBox(x, y, startButtonHitbox) then
@@ -460,6 +787,7 @@ end
     }
 }, nil)
         macrostarted = true
+            focusWindow("Roblox")
      checkBiome()
         warningtext = "Macro started!"
 warningTarget = 500
@@ -503,7 +831,34 @@ end
 end
 end
     local memTimer = 0
+        local brTimer = 0
+        local sctimer = 0
 function love.update(dt)
+    if macrostarted == true and busyusingstuff == false and brsincelastused == 0 and shouldusebr == true then
+        usebr()
+        brsincelastused = 35
+    end
+        if brsincelastused > 0 then
+        brTimer = brTimer + dt
+        if brTimer >= 60 then
+            brTimer = brTimer - 60
+            brsincelastused = brsincelastused - 1
+        end
+    end
+    if macrostarted == true and busyusingstuff == false and scsincelastused == 0 and shouldusesc == true then
+        usesc()
+        scsincelastused = 20
+    end
+        if scsincelastused > 0 then
+        sctimer = sctimer + dt
+        if sctimer >= 60 then
+            sctimer = sctimer - 60
+            scsincelastused = scsincelastused - 1
+        end
+    end
+
+    updateWaits()
+    
   local speed = 2.5
 
     if warningTarget == -500 then
@@ -555,6 +910,7 @@ tabmenuX = tabmenuX + (target - tabmenuX) * 10 * dt
     fishingHitbox.x = tabmenuX - 195
     creditsHitbox.x = tabmenuX - 195
     licensesHitbox.x = tabmenuX - 195
+    AutoUsageHitbox.x = tabmenuX - 195
     local mx, my = love.mouse.getPosition()
 
     if isOverMenu(mx, my)
@@ -569,7 +925,24 @@ tabmenuX = tabmenuX + (target - tabmenuX) * 10 * dt
     or pointInBox(mx, my, fishingHitbox)
     or pointInBox(mx, my, creditsHitbox)
     or pointInBox(mx, my, licensesHitbox)
-    or pointInBox(mx, my, songHitbox) then
+    or pointInBox(mx, my, songHitbox)
+    or pointInBox(mx, my, normalBiomeHitbox)
+    or pointInBox(mx, my, windyBiomeHitbox)
+    or pointInBox(mx, my, snowyBiomeHitbox)
+    or pointInBox(mx, my, rainyBiomeHitbox)
+    or pointInBox(mx, my, sandstormBiomeHitbox)
+    or pointInBox(mx, my, hellBiomeHitbox)
+    or pointInBox(mx, my, starfallBiomeHitbox)
+    or pointInBox(mx, my, heavenBiomeHitbox)
+    or pointInBox(mx, my, corruptionBiomeHitbox)
+    or pointInBox(mx, my, singularityBiomeHitbox)
+    or pointInBox(mx, my, GraveyardBiomeHitbox)
+    or pointInBox(mx, my, PumpkinMoonBiomeHitbox)
+    or pointInBox(mx, my, TheRadiantForestBiomeHitbox)
+    or pointInBox(mx, my, LostForestBiomeHitbox)
+    or pointInBox(mx, my, AutoUsageHitbox)
+    or pointInBox(mx, my, autobrusehitbox)
+    or pointInBox(mx, my, autoscusehitbox) then
 
         love.mouse.setCursor(handCursor)
     else
@@ -645,17 +1018,22 @@ fishingHitbox = {
     w = 185,
     h = 40
 }
-
-creditsHitbox = {
+AutoUsageHitbox = {
     x = tabmenuX - 195,
     y = 230,
+    w = 185,
+    h = 40
+}
+creditsHitbox = {
+    x = tabmenuX - 195,
+    y = 275,
     w = 185,
     h = 40
 }
 
 licensesHitbox = {
     x = tabmenuX - 195,
-    y = 275,
+    y = 320,
     w = 185,
     h = 40
 }

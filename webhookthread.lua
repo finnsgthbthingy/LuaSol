@@ -28,8 +28,8 @@ while true do
     }
 
     if statusCode == 204 then
-        print("Webhook sent successfully!")
+        print("twin this webhook shi working")
     else
-        print("Webhook failed. Status: " .. tostring(statusCode))
+        print("twin this webhook shi aint working. Status: " .. tostring(statusCode))
     end
 end

@@ -185,10 +185,24 @@ local biomes = {
         icon = "https://static.wikia.nocookie.net/sol-rng/images/d/dc/DISCORICH-BROKEN.png/revision/latest?cb=20260823042244",
         color = 0x020030
     },
-    ["BLAZING SUN"] = {
-        icon = "https://raw.githubusercontent.com/vexsyx/OysterDetector/refs/heads/main/assets/blazing%20sun.png",
+    ["THE RADIANT FOREST"] = {
+        icon = "https://static.wikia.nocookie.net/sol-rng/images/5/5d/Discordradiantforest.png/revision/latest?cb=20261104035252",
         color = 0xfcba03
+    },
+    ["LOST FOREST"] = {
+        icon = "https://static.wikia.nocookie.net/sol-rng/images/1/11/Discordlostforest.png/revision/latest?cb=20261104035318",
+        color = 0xfcba03
+    },
+    ["PUMPKIN MOON"] = {
+        icon = "https://static.wikia.nocookie.net/sol-rng/images/a/ad/Pumpkin_Moon_Biome_%28BloxTrap%29.png/revision/latest?cb=20250204082602",
+        color = 0xff6f00
+    },
+    GRAVEYARD = {
+        icon = "https://static.wikia.nocookie.net/sol-rng/images/d/dd/Graveyard_Icon_%28BloxTrap%29.png/revision/latest?cb=20250204084147",
+        color = 0x9c9591
     }
+
+
 }
 
 biomedata = biomes[biome]
@@ -217,8 +231,14 @@ elseif biome == "NULL" then
     shouldDetect = donullbiomedetection
 elseif biome == "SINGULARITY" then
     shouldDetect = dosingularitybiomedetection
-elseif biome == "BLAZING SUN" then
-    shouldDetect = doblazingsunbiomedetection
+elseif biome == "THE RADIANT FOREST" then
+    shouldDetect = doTheRadiantForestdetection
+elseif biome == "LOST FOREST" then
+    shouldDetect = doLostForestBiomeDetection
+elseif biome == "PUMPKIN MOON" then
+    shouldDetect = doPumpkinMoonBiomeDetection
+elseif biome == "GRAVEYARD" then
+    shouldDetect = doGraveyardBiomeDetection
 end
 local privateservermessage = ""
 if string.find(privateServerLink, "https://www.roblox.com/share?code=", 1, true)
